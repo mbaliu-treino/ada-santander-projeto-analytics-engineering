@@ -1,0 +1,57 @@
+name: db_env
+services:
+  db:
+    image: postgres
+    restart: always
+    user: root
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: postgres
+      # PGDATA: /data/postgres
+      # PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - "pgdata:/var/lib/postgresql/data"
+      # - "./data_db:/data/postgres"
+      # - "./data_db/data:/var/lib/postgresql/data"
+      # - "./data_db/config:/etc/postgresql"
+    networks:
+      - db_net
+
+  # postgres_setup:
+  #   image: postgres
+  #   user: root
+  #   volumes:
+  #     - "./data_db/data:/var/lib/postgresql/data"
+  #     - "./data_db/config:/etc/postgresql"
+  #   entrypoint: [ "bash", "-c", "chmod 750 -R /var/lib/postgresql/data/pgdata && chmod 750 -R /etc/postgresql"] 
+  #   depends_on:
+  #     - db
+
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    depends_on:
+      - "postgres_setup"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin 
+    ports:
+      - 80:80
+    networks:
+      - db_net
+    volumes:
+       - pgadmin_vol:/var/lib/pgadmin
+    links:
+      - db
+
+networks:
+  db_net:
+    driver: bridge
+
+volumes:
+    pgadmin_vol:
+    pgdata:

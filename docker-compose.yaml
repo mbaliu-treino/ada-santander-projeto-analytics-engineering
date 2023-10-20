@@ -1,0 +1,45 @@
+name: projeto-airbnb
+
+services:
+  pgdb:
+    image: postgres
+    container_name: psql
+    restart: always
+    user: root
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:secret}
+      POSTGRES_DB: ${POSTGRES_DB:postgres}
+    volumes:
+      - "pgdata:/var/lib/postgresql/data"
+    networks:
+      - db_net
+
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    depends_on:
+      - "pgdb"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:pgadmin@pgadmin.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:pgadmin}
+    ports:
+      - 80:80
+    networks:
+      - db_net
+    volumes:
+       - pgadmin:/var/lib/pgadmin
+    links:
+      - pgdb
+
+networks:
+  db_net:
+    driver: bridge
+
+volumes:
+    pgadmin:
+    pgdata:
